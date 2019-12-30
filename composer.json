@@ -1,7 +1,9 @@
 {
     "name": "viktor/differ",
+    "bin": ["bin/gendiff2"],
     "description": "Calculate differencies in config files. Second project in PHP proffession.",
-    "type": "project",
+    "type": "library",
+    "license": "MIT",
     "require": {
         "docopt/docopt": "^1.0"
     },
