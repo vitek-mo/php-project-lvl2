@@ -1,0 +1,25 @@
+{
+    "name": "viktor/differ",
+    "description": "Calculate differencies in config files. Second project in PHP proffession.",
+    "type": "project",
+    "require": {
+        "docopt/docopt": "^1.0"
+    },
+    "authors": [
+        {
+            "name": "Viktor Moisseyenko",
+            "email": "vitek.mo@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Differ\\": "src"
+        },
+        "files": [
+            "src/DocoptDriver.php",
+            "src/FileDriver.php",
+            "src/Analyzer.php",
+            "src/Differ.php"
+        ]
+    }
+}
