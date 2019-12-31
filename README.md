@@ -11,6 +11,3 @@ So, if you want to globally run my gendiff, you need to change order of PATHs in
 
 
 [![asciicast](https://asciinema.org/a/roYuqTd22BcW728Eqx8jdLdT0.svg)](https://asciinema.org/a/roYuqTd22BcW728Eqx8jdLdT0)
-
-Player
-<script id="asciicast-roYuqTd22BcW728Eqx8jdLdT0" src="https://asciinema.org/a/roYuqTd22BcW728Eqx8jdLdT0.js" async></script>
