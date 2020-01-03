@@ -39,7 +39,12 @@ function genDiff($contents)
     //sort by key
     $sorted = $merged;
     ksort($sorted);
-    
+
+    return composeString($sorted);
+}
+
+function composeString($sorted)
+{
     //create array of strings
     $strings = array_map(function ($value, $key) {
         return "  {$value} {$key}";
@@ -50,9 +55,7 @@ function genDiff($contents)
     array_push($strings, '}');
     
     //toString
-    $result = implode("\n", $strings);
-    
-    return $result;
+    return implode("\n", $strings);
 }
 
 function array_flatten($array)
