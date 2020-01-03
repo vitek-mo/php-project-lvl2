@@ -12,11 +12,9 @@ function genDiff($contents)
     //convert to array
     $decoded1 = json_decode($json1, true);
     $decoded2 = json_decode($json2, true);
-    //extract equal values
+
     $equals = array_intersect_assoc($decoded1, $decoded2);
-    //extract added values
     $pluses = array_diff_assoc($decoded2, $decoded1);
-    //extract disappeared values
     $minuses = array_diff_assoc($decoded1, $decoded2);
 
     //adding signs
