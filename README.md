@@ -6,7 +6,7 @@ composer require global viktor/differ:dev-master
 ```
 or use function from library in your project.
 
-usage example:
+usage example:<br>
 file1:
 ```
 {
