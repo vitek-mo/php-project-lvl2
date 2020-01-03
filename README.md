@@ -2,6 +2,7 @@
 
 <a href="https://codeclimate.com/github/vitek-mo/php-project-lvl2/maintainability"><img src="https://api.codeclimate.com/v1/badges/19837d8b3c4664864a5c/maintainability" /></a>
 <a href="https://codeclimate.com/github/vitek-mo/php-project-lvl2/test_coverage"><img src="https://api.codeclimate.com/v1/badges/19837d8b3c4664864a5c/test_coverage" /></a>
+<a href="https://travis-ci.org/vitek-mo/php-project-lvl2"><img src="https://travis-ci.org/vitek-mo/php-project-lvl2.svg?branch=master" /></a>
 
 Compare difference between configuration files. Can be installed globally with composer using
 ```
