@@ -2,16 +2,15 @@
 
 namespace Differ\Analyzer;
 
+use function Differ\Parsers\parse;
+
 //Accepts array of two elements in JSON format. Return difference.
 //If key=>value from first element exist in second element, key=>value will be keept unchanged in result element;
 //If key=>value from first element doesn't exist in second element, result element will kept with '-' sign;
 //If key=>value exist only on second element, it will be added to result element with '+' sign;
-function genDiff($contents)
+function genDiff($contents, $format)
 {
-    [$json1, $json2] = $contents;
-    //convert to array
-    $decoded1 = json_decode($json1, true);
-    $decoded2 = json_decode($json2, true);
+    [$decoded1, $decoded2] = parse($contents, $format);
 
     $equals = array_intersect_assoc($decoded1, $decoded2);
     $pluses = array_diff_assoc($decoded2, $decoded1);
