@@ -10,6 +10,9 @@ composer require global viktor/differ:dev-master
 ```
 or use function from library in your project.
 
+Global installation example
+<a href="https://asciinema.org/a/TTmPm3nLSWRdWFPbf4EvVbSQx" target="_blank"><img src="https://asciinema.org/a/TTmPm3nLSWRdWFPbf4EvVbSQx.svg" /></a>
+
 usage example:<br>
 file1:
 ```
