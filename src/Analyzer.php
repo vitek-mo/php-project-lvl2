@@ -31,22 +31,22 @@ function analyze($contents, $format)
     $keys = union(array_keys($array1), array_keys($array2));
     asort($keys);
     
-    $result = flatten(array_map(function ($key) use ($array1, $array2) {
+    $result = flatten(flatten(array_map(function ($key) use ($array1, $array2) {
+        $item = [];
         if (!array_key_exists($key, $array1)) {
-            return [['type' => 'added', 'key' => $key, 'value' => $array2[$key], 'children' => null]];
-        }
-        if (!array_key_exists($key, $array2)) {
-            return [['type' => 'removed', 'key' => $key, 'value' => $array1[$key], 'children' => null]];
-        }
-        if ($array1[$key] === $array2[$key]) {
-            return [['type' => 'same', 'key' => $key, 'value' => $array1[$key], 'children' => null]];
+            $item[] = [['type' => 'added', 'key' => $key, 'value' => $array2[$key], 'children' => null]];
+        } elseif (!array_key_exists($key, $array2)) {
+            $item[] = [['type' => 'removed', 'key' => $key, 'value' => $array1[$key], 'children' => null]];
+        } elseif ($array1[$key] === $array2[$key]) {
+            $item[] = [['type' => 'same', 'key' => $key, 'value' => $array1[$key], 'children' => null]];
         } else {
-            return [
+            $item[] = [
                     ['type' => 'removed', 'key' => $key, 'value' => $array1[$key], 'children' => null],
                     ['type' => 'added', 'key' => $key, 'value' => $array2[$key], 'children' => null]
                     ];
         }
-    }, $keys));
+        return $item;
+    }, $keys)));
     return renderer($result);
 }
 
