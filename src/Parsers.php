@@ -8,8 +8,8 @@ function parse($contents, $format)
 {
     [$content1, $content2] = $contents;
     if ($format === 'json') {
-        $parsed1 = json_decode($content1, true);
-        $parsed2 = json_decode($content2, true);
+        $parsed1 = json_decode($content1);
+        $parsed2 = json_decode($content2);
     }
     if ($format === 'yml') {
         $parsed1 = Yaml::parse($content1);

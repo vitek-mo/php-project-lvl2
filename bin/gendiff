@@ -13,8 +13,6 @@ if (file_exists($devPath)) {
 use function Differ\DocoptDriver\docoptInit;
 use function Differ\DocoptDriver\getPaths;
 
-//use function Differ\FileDriver\getFilesContent;
-
 const VERSION = 'Generate diff 0.1';
 const DOC = <<<DOC
 
@@ -34,9 +32,8 @@ Options:
 DOC;
 
 $params = array('version'=>VERSION);
-$params = array('version'=>VERSION);
 $args = docoptInit(DOC, $params);
 $format = $args->args['--format'];
 [$path1, $path2] = getPaths($args);
     
-print_r(\Differ\genDiff($path1, $path2, $format));
+print_r(\Differ\Analyzer\genDiff($path1, $path2, $format));
