@@ -32,21 +32,21 @@ function analyze($contents, $format)
     asort($keys);
     
     $result = flatten(array_map(function ($key) use ($array1, $array2) {
-            if (!array_key_exists($key, $array1)) {
-                return [['type' => 'added', 'key' => $key, 'value' => $array2[$key], 'children' => null]];
-            }
-            if (!array_key_exists($key, $array2)) {
-                return [['type' => 'removed', 'key' => $key, 'value' => $array1[$key], 'children' => null]];
-            }
-            if ($array1[$key] === $array2[$key]) {
-                return [['type' => 'same', 'key' => $key, 'value' => $array1[$key], 'children' => null]];
-            } else {
-                return [
-                        ['type' => 'removed', 'key' => $key, 'value' => $array1[$key], 'children' => null],
-                        ['type' => 'added', 'key' => $key, 'value' => $array2[$key], 'children' => null]
-                        ];
-            }
-        }, $keys));
+        if (!array_key_exists($key, $array1)) {
+            return [['type' => 'added', 'key' => $key, 'value' => $array2[$key], 'children' => null]];
+        }
+        if (!array_key_exists($key, $array2)) {
+            return [['type' => 'removed', 'key' => $key, 'value' => $array1[$key], 'children' => null]];
+        }
+        if ($array1[$key] === $array2[$key]) {
+            return [['type' => 'same', 'key' => $key, 'value' => $array1[$key], 'children' => null]];
+        } else {
+            return [
+                    ['type' => 'removed', 'key' => $key, 'value' => $array1[$key], 'children' => null],
+                    ['type' => 'added', 'key' => $key, 'value' => $array2[$key], 'children' => null]
+                    ];
+        }
+    }, $keys));
     return renderer($result);
 }
 
@@ -72,7 +72,7 @@ function renderer(array $array, $tab = "")
                         $sign = '?';
                 }
                 if (is_bool($element['value'])) {
-                    $value = $element['value']?'true':'false';
+                    $value = $element['value'] ? 'true' : 'false';
                 } else {
                     $value = $element['value'];
                 }
