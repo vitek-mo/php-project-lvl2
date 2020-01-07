@@ -71,11 +71,7 @@ function renderer(array $array, $tab = "")
                     default:
                         $sign = '?';
                 }
-                if (is_bool($element['value'])) {
-                    $value = $element['value'] ? 'true' : 'false';
-                } else {
-                    $value = $element['value'];
-                }
+                $value = booleazator($element['value']);
                 $acc[] = "{$tab}  {$sign} {$element['key']}: {$value}";
             }
         }
@@ -83,4 +79,13 @@ function renderer(array $array, $tab = "")
     }, []);
     $result[] = "}";
     return implode("\n", flattenAll($result));
+}
+
+function booleazator($value)
+{
+    if(is_bool($value)) {
+        return $value ? 'true' : 'false';
+    } else {
+        return $value;
+    }
 }

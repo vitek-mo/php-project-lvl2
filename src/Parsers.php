@@ -12,8 +12,8 @@ function parse($contents, $format)
         $parsed2 = json_decode($content2);
     }
     if ($format === 'yml') {
-        $parsed1 = Yaml::parse($content1);
-        $parsed2 = Yaml::parse($content2);
+        $parsed1 = Yaml::parse($content1, Yaml::PARSE_OBJECT_FOR_MAP);
+        $parsed2 = Yaml::parse($content2, Yaml::PARSE_OBJECT_FOR_MAP);
     }
     return [$parsed1, $parsed2];
 }
