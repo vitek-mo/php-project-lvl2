@@ -83,7 +83,7 @@ function renderer(array $array, $tab = "")
 
 function booleazator($value)
 {
-    if(is_bool($value)) {
+    if (is_bool($value)) {
         return $value ? 'true' : 'false';
     } else {
         return $value;
