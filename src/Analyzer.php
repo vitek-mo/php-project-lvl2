@@ -17,74 +17,83 @@ function genDiff($path1, $path2, $format)
         print_r("Error: {$e->getMessage()}\n");
         return;
     }
-    return analyze($contents, $format);
-}
-
-//Accepts array of two elements in JSON format. Return difference.
-function analyze($contents, $format)
-{
-    [$obj1, $obj2] = parse($contents, $format);
     
+    [$obj1, $obj2] = parse($contents, $format);
     $array1 = get_object_vars($obj1);
     $array2 = get_object_vars($obj2);
     
-    $keys = union(array_keys($array1), array_keys($array2));
-    asort($keys);
-    
-    $result = flatten(flatten(array_map(function ($key) use ($array1, $array2) {
-        $item = [];
-        if (!array_key_exists($key, $array1)) {
-            $item[] = [['type' => 'added', 'key' => $key, 'value' => $array2[$key], 'children' => null]];
-        } elseif (!array_key_exists($key, $array2)) {
-            $item[] = [['type' => 'removed', 'key' => $key, 'value' => $array1[$key], 'children' => null]];
-        } elseif ($array1[$key] === $array2[$key]) {
-            $item[] = [['type' => 'same', 'key' => $key, 'value' => $array1[$key], 'children' => null]];
-        } else {
-            $item[] = [
-                    ['type' => 'removed', 'key' => $key, 'value' => $array1[$key], 'children' => null],
-                    ['type' => 'added', 'key' => $key, 'value' => $array2[$key], 'children' => null]
-                    ];
-        }
-        return $item;
-    }, $keys)));
-    return renderer($result);
+    $dif = makeAst($array1, $array2);
+    return renderer($dif);
 }
 
-function renderer(array $array, $tab = "")
+function makeNode($type, $key, $value)
 {
-    $keys = array_keys($array);
-    $result[] = "{$tab}{";
-    $result[] = array_reduce($keys, function ($acc, $key) use ($array, $tab) {
-        $element = $array[$key];
-        if (is_array($element) && isset($element['type'])) {
-            if ($element['type'] !== 'children') {
-                switch ($element['type']) {
-                    case 'same':
-                        $sign = ' ';
-                        break;
-                    case 'added':
-                        $sign = '+';
-                        break;
-                    case 'removed':
-                        $sign = '-';
-                        break;
-                    default:
-                        $sign = '?';
-                }
-                $value = booleazator($element['value']);
-                $acc[] = "{$tab}  {$sign} {$element['key']}: {$value}";
-            }
+    return [
+        'type' => $type,
+        'key' => $key,
+        'value' => $value
+    ];
+}
+
+function makeChildren($type, $key, $children)
+{
+    return [
+        'type' => $type,
+        'key' => $key,
+        'children' => $children
+    ];
+}
+
+function makeAst($array1, $array2)
+{
+    $keys = union(array_keys($array1), array_keys($array2));
+    asort($keys);
+    $result = array_reduce($keys, function ($acc, $key) use ($array1, $array2) {
+        if (!array_key_exists($key, $array1)) {
+            $acc[] = makeNode('added', $key, booleazator($array2[$key]));
+            return $acc;
         }
-        return $acc;
+        if (!array_key_exists($key, $array2)) {
+            $acc[] = makeNode('removed', $key, booleazator($array1[$key]));
+            return $acc;
+        }
+        if ($array1[$key] === $array2[$key]) {
+            $acc[] = makeNode('same', $key, booleazator($array1[$key]));
+            return $acc;
+        }
+        if (is_object($array1[$key]) && is_object($array2[$key])) {
+            $deeperData1 = get_object_vars($array1[$key]);
+            $deeperData2 = get_object_vars($array2[$key]);
+            $acc[] = makeChildren('children', $key, makeAst($deeperData1, $deeperData2));
+            return $acc;
+        }
+        if ($array1[$key] !== $array2[$key]) {
+            $acc[] = makeNode('added', $key, booleazator($array2[$key]));
+            $acc[] = makeNode('removed', $key, booleazator($array1[$key]));
+            return $acc;
+        }
     }, []);
-    $result[] = "}";
-    return implode("\n", flattenAll($result));
+    return $result;
+}
+
+function renderer(array $array)
+{
+    print_r($array);
 }
 
 function booleazator($value)
 {
     if (is_bool($value)) {
         return $value ? 'true' : 'false';
+    } else {
+        return $value;
+    }
+}
+
+function objToArray($value)
+{
+    if (is_object($value)) {
+        return "";
     } else {
         return $value;
     }
