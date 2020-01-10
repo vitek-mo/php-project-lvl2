@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-$devPath = '__DIR__/../vendor/autoload.php';
+$devPath = __DIR__ . '/../vendor/autoload.php';
 $absoluteDevPath = '/home/viktor/hexlet/PHP/projects/php-project-lvl2/vendor/autoload.php';
 
 if (file_exists($devPath)) {
