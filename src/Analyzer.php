@@ -76,24 +76,79 @@ function makeAst($array1, $array2)
     return $result;
 }
 
-function renderer(array $array)
+function renderer(array $array, $tab = "  ")
 {
-    print_r($array);
+    $result = [];
+    if(!isValidNode($array)) {
+        $result[] = "{";
+    }
+    
+    $result[] = array_map(function ($item) use ($tab) {
+        if(isChildren($item)) {
+            $str = [];
+            $str[] = "{$tab}  {$item['key']}: {";
+            $str[] = "{$tab}  }";
+            return $str;
+        }
+        if(isRemoved($item)) {
+            $str = [];
+            $str[] = "{$tab}- {$item['key']}: {";
+            $str[] = "{$tab}  }";
+            return $str;
+        }
+        if(isAdded($item)) {
+            $str = [];
+            $str[] = "{$tab}+ {$item['key']}: {";
+            $str[] = "{$tab}  }";
+            return $str;
+        }
+    }, $array);
+    $result = flattenAll($result);
+    
+    if(!isValidNode($array)) {
+    $result[] = "}";
+    }
+    print_r(implode("\n", $result));
+}
+
+function isChildren($array)
+{
+    if(isValidNode($array) && $array['type'] === 'children') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function isRemoved($array)
+{
+    if(isValidNode($array) && $array['type'] === 'removed') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function isAdded($array)
+{
+    if(isValidNode($array) && $array['type'] === 'added') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function isValidNode($array)
+{
+    if (isset($array['type']) && in_array($array['type'], ['children', 'same', 'added', 'removed'])) {
+        return true;
+    }
 }
 
 function booleazator($value)
 {
     if (is_bool($value)) {
         return $value ? 'true' : 'false';
-    } else {
-        return $value;
-    }
-}
-
-function objToArray($value)
-{
-    if (is_object($value)) {
-        return "";
     } else {
         return $value;
     }
