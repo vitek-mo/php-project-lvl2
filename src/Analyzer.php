@@ -23,23 +23,16 @@ function genDiff($path1, $path2, $format)
     $array2 = get_object_vars($obj2);
     
     $dif = makeAst($array1, $array2);
-    return renderer($dif);
+    $rendered = renderer($dif);
+    return $rendered;
 }
 
-function makeNode($type, $key, $value)
+function makeNode($type, $key, $value, $children)
 {
     return [
         'type' => $type,
         'key' => $key,
-        'value' => $value
-    ];
-}
-
-function makeChildren($type, $key, $children)
-{
-    return [
-        'type' => $type,
-        'key' => $key,
+        'value' => $value,
         'children' => $children
     ];
 }
@@ -47,29 +40,28 @@ function makeChildren($type, $key, $children)
 function makeAst($array1, $array2)
 {
     $keys = union(array_keys($array1), array_keys($array2));
-    asort($keys);
     $result = array_reduce($keys, function ($acc, $key) use ($array1, $array2) {
         if (!array_key_exists($key, $array1)) {
-            $acc[] = makeNode('added', $key, booleazator($array2[$key]));
+            $acc[] = makeNode('added', $key, booleazator($array2[$key]), null);
             return $acc;
         }
         if (!array_key_exists($key, $array2)) {
-            $acc[] = makeNode('removed', $key, booleazator($array1[$key]));
+            $acc[] = makeNode('removed', $key, booleazator($array1[$key]), null);
             return $acc;
         }
         if ($array1[$key] === $array2[$key]) {
-            $acc[] = makeNode('same', $key, booleazator($array1[$key]));
+            $acc[] = makeNode('same', $key, booleazator($array1[$key]), null);
             return $acc;
         }
         if (is_object($array1[$key]) && is_object($array2[$key])) {
             $deeperData1 = get_object_vars($array1[$key]);
             $deeperData2 = get_object_vars($array2[$key]);
-            $acc[] = makeChildren('children', $key, makeAst($deeperData1, $deeperData2));
+            $acc[] = makeNode('children', $key, null, makeAst($deeperData1, $deeperData2));
             return $acc;
         }
         if ($array1[$key] !== $array2[$key]) {
-            $acc[] = makeNode('added', $key, booleazator($array2[$key]));
-            $acc[] = makeNode('removed', $key, booleazator($array1[$key]));
+            $acc[] = makeNode('added', $key, booleazator($array2[$key]), null);
+            $acc[] = makeNode('removed', $key, booleazator($array1[$key]), null);
             return $acc;
         }
     }, []);
@@ -79,70 +71,138 @@ function makeAst($array1, $array2)
 function renderer(array $array, $tab = "  ")
 {
     $result = [];
-    if(!isValidNode($array)) {
+    if ($tab === "  ") {
         $result[] = "{";
     }
     
-    $result[] = array_map(function ($item) use ($tab) {
-        if(isChildren($item)) {
-            $str = [];
-            $str[] = "{$tab}  {$item['key']}: {";
-            $str[] = "{$tab}  }";
-            return $str;
+    $result[] = array_reduce($array, function ($acc, $node) use ($tab) {
+        $sign = getSign($node);
+        $digDeep = 0;
+        if (isValueIsObject($node)) {
+            $end = "{";
         }
-        if(isRemoved($item)) {
-            $str = [];
-            $str[] = "{$tab}- {$item['key']}: {";
-            $str[] = "{$tab}  }";
-            return $str;
+        if (isChildren($node)) {
+            $end = "{";
+            $digDeep = $node['children'];
         }
-        if(isAdded($item)) {
-            $str = [];
-            $str[] = "{$tab}+ {$item['key']}: {";
-            $str[] = "{$tab}  }";
-            return $str;
+        if (isValueIsValue($node)) {
+            $end = $node['value'];
         }
-    }, $array);
-    $result = flattenAll($result);
+        $acc[] = "{$tab}{$sign} {$node['key']}: {$end}";
+        
+        if ($digDeep) {
+            $acc[] = renderer($digDeep, $tab . "    ");
+        }
+        
+        if (isValueIsObject($node)) {
+            $acc[] = renderObject(get_object_vars($node['value']), $tab);
+        }
+        
+        if (isValueIsObject($node) || $digDeep) {
+            $acc[] = "{$tab}  }";
+        }
+        
+        return $acc;
+    }, []);
     
-    if(!isValidNode($array)) {
-    $result[] = "}";
+    if ($tab === "  ") {
+        $result[] = "}";
     }
-    print_r(implode("\n", $result));
+    $resultFlatten = flattenAll($result);
+    $resultString = implode("\n", $resultFlatten);
+    return $resultString;
 }
 
-function isChildren($array)
+function renderObject($node, $tab)
 {
-    if(isValidNode($array) && $array['type'] === 'children') {
-        return true;
+    $result = [];
+    foreach ($node as $key => $value) {
+        $result[] = "{$tab}      {$key}: {$value}";
+    }
+    return $result;
+}
+
+function isSame($node)
+{
+    if (isset($node['type'])) {
+        if ($node['type'] === 'same') {
+            return true;
+        }
+    }
+    return false;
+}
+
+function isRemoved($node)
+{
+    if (isset($node['type'])) {
+        if ($node['type'] === 'removed') {
+            return true;
+        }
+    }
+    return false;
+}
+
+function isAdded($node)
+{
+    if (isset($node['type'])) {
+        if ($node['type'] === 'added') {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getSign($node)
+{
+    if (isChildren($node) || isSame($node)) {
+        return " ";
+    } elseif (isRemoved($node)) {
+        return "-";
+    } elseif (isAdded($node)) {
+        return "+";
     } else {
-        return false;
+        return "?";
     }
 }
 
-function isRemoved($array)
+function isValueIsValue($node)
 {
-    if(isValidNode($array) && $array['type'] === 'removed') {
-        return true;
-    } else {
-        return false;
+    if (isset($node['value'])) {
+        if ($node['value'] !== null && !is_object($node['value'])) {
+            return true;
+        }
     }
+    return false;
 }
 
-function isAdded($array)
+function isValueIsObject($node)
 {
-    if(isValidNode($array) && $array['type'] === 'added') {
-        return true;
-    } else {
-        return false;
+    if (isset($node['value'])) {
+        if (is_object($node['value'])) {
+            return true;
+        }
     }
+    return false;
 }
 
-function isValidNode($array)
+function isNode($node)
 {
-    if (isset($array['type']) && in_array($array['type'], ['children', 'same', 'added', 'removed'])) {
-        return true;
+    if (isset($node['type'])) {
+        if (in_array($node['type'], ['same', 'added', 'removed'])) {
+            return true;
+        }
     }
+    return false;
+}
+
+function isChildren($node)
+{
+    if (isset($node['type'])) {
+        if ($node['type'] === 'children') {
+            return true;
+        }
+    }
+    return false;
 }
 
 function booleazator($value)
