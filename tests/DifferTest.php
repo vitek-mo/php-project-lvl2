@@ -8,42 +8,83 @@ use function Differ\Analyzer\genDiff;
 
 class DifferTest extends TestCase
 {
-    public function testDifferPlainJson()
+    public function testPlainJson()
     {
-        $jsonExpectedPath = __DIR__ . '/fixtures/result.json';
-        $jsonBeforePath = __DIR__ . '/fixtures/before.json';
-        $jsonAfterPath = __DIR__ . '/fixtures/after.json';
-        $expectedResult = file_get_contents($jsonExpectedPath);
-        $this->assertEquals($expectedResult, genDiff($jsonBeforePath, $jsonAfterPath, 'json'));
+        $expectedPath = __DIR__ . '/fixtures/result.json';
+        $beforePath = __DIR__ . '/fixtures/before.json';
+        $afterPath = __DIR__ . '/fixtures/after.json';
+        $expectedResult = file_get_contents($expectedPath);
+        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
     }
     
-    public function testDifferPlainYml()
+    public function testPlainYml()
     {
-        $jsonExpectedPath = __DIR__ . '/fixtures/result.json';
-        $ymlBeforePath = __DIR__ . '/fixtures/before.yml';
-        $ymlAfterPath = __DIR__ . '/fixtures/after.yml';
-        $expectedResult = file_get_contents($jsonExpectedPath);
-        
-        $this->assertEquals($expectedResult, genDiff($ymlBeforePath, $ymlAfterPath, 'yml'));
+        $expectedPath = __DIR__ . '/fixtures/result.json';
+        $beforePath = __DIR__ . '/fixtures/before.yml';
+        $afterPath = __DIR__ . '/fixtures/after.yml';
+        $expectedResult = file_get_contents($expectedPath);
+        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
     }
     
-    public function testDifferJson()
+    public function testPlainJsonYml()
     {
-        $jsonExpectedPath = __DIR__ . '/fixtures/result2.json';
-        $jsonBeforePath = __DIR__ . '/fixtures/before2.json';
-        $jsonAfterPath = __DIR__ . '/fixtures/after2.json';
-        $expectedResult = file_get_contents($jsonExpectedPath);
-        
-        $this->assertEquals($expectedResult, genDiff($jsonBeforePath, $jsonAfterPath, 'json'));
+        $expectedPath = __DIR__ . '/fixtures/result.json';
+        $beforePath = __DIR__ . '/fixtures/before.json';
+        $afterPath = __DIR__ . '/fixtures/after.yml';
+        $expectedResult = file_get_contents($expectedPath);
+        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
     }
     
-    public function testDifferYml()
+    public function testPlainYmlJson()
     {
-        $jsonExpectedPath = __DIR__ . '/fixtures/result2.json';
-        $ymlBeforePath = __DIR__ . '/fixtures/before2.yml';
-        $ymlAfterPath = __DIR__ . '/fixtures/after2.yml';
-        $expectedResult = file_get_contents($jsonExpectedPath);
-        
-        $this->assertEquals($expectedResult, genDiff($ymlBeforePath, $ymlAfterPath, 'yml'));
+        $expectedPath = __DIR__ . '/fixtures/result.json';
+        $beforePath = __DIR__ . '/fixtures/before.yml';
+        $afterPath = __DIR__ . '/fixtures/after.json';
+        $expectedResult = file_get_contents($expectedPath);
+        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
+    }
+    
+    public function testNestedJson()
+    {
+        $expectedPath = __DIR__ . '/fixtures/result2.json';
+        $beforePath = __DIR__ . '/fixtures/before2.json';
+        $afterPath = __DIR__ . '/fixtures/after2.json';
+        $expectedResult = file_get_contents($expectedPath);
+        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
+    }
+    
+    public function testNestedYml()
+    {
+        $expectedPath = __DIR__ . '/fixtures/result2.json';
+        $beforePath = __DIR__ . '/fixtures/before2.yml';
+        $afterPath = __DIR__ . '/fixtures/after2.yml';
+        $expectedResult = file_get_contents($expectedPath);
+        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
+    }
+    
+    public function testNestedJsonYml()
+    {
+        $expectedPath = __DIR__ . '/fixtures/result2.json';
+        $beforePath = __DIR__ . '/fixtures/before2.json';
+        $afterPath = __DIR__ . '/fixtures/after2.yml';
+        $expectedResult = file_get_contents($expectedPath);
+        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
+    }
+    public function testNestedYmlJson()
+    {
+        $expectedPath = __DIR__ . '/fixtures/result2.json';
+        $beforePath = __DIR__ . '/fixtures/before2.yml';
+        $afterPath = __DIR__ . '/fixtures/after2.json';
+        $expectedResult = file_get_contents($expectedPath);
+        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
+    }
+    
+    public function testNestedPlain()
+    {
+        $expectedPath = __DIR__ . '/fixtures/result2.plain';
+        $beforePath = __DIR__ . '/fixtures/before2.json';
+        $afterPath = __DIR__ . '/fixtures/after2.json';
+        $expectedResult = file_get_contents($expectedPath);
+        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
     }
 }

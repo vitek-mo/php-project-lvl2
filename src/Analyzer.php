@@ -4,9 +4,10 @@ namespace Differ\Analyzer;
 
 use function Differ\Parsers\parse;
 use function Funct\Collection\union;
-use function Funct\Collection\flatten;
-use function Funct\Collection\flattenAll;
 use function Differ\FileDriver\getFilesContent;
+use function Differ\FileDriver\getFileExtension;
+use function Differ\Formatters\Json\renderJson;
+use function Differ\Formatters\Plain\renderPlain;
 
 function genDiff($path1, $path2, $format)
 {
@@ -18,12 +19,21 @@ function genDiff($path1, $path2, $format)
         return;
     }
     
-    [$obj1, $obj2] = parse($contents, $format);
+    $outputFormat1 = getFileExtension($path1);
+    $outputFormat2 = getFileExtension($path2);
+    $outputFormats = [$outputFormat1, $outputFormat2];
+    
+    [$obj1, $obj2] = parse($contents, $outputFormats);
     $array1 = get_object_vars($obj1);
     $array2 = get_object_vars($obj2);
     
     $dif = makeAst($array1, $array2);
-    $rendered = renderer($dif);
+    if ($format === 'json') {
+        $rendered = renderJson($dif);
+    }
+    if ($format === 'plain') {
+        $rendered = renderPlain($dif);
+    }
     return $rendered;
 }
 
@@ -66,143 +76,6 @@ function makeAst($array1, $array2)
         }
     }, []);
     return $result;
-}
-
-function renderer(array $array, $tab = "  ")
-{
-    $result = [];
-    if ($tab === "  ") {
-        $result[] = "{";
-    }
-    
-    $result[] = array_reduce($array, function ($acc, $node) use ($tab) {
-        $sign = getSign($node);
-        $digDeep = 0;
-        if (isValueIsObject($node)) {
-            $end = "{";
-        }
-        if (isChildren($node)) {
-            $end = "{";
-            $digDeep = $node['children'];
-        }
-        if (isValueIsValue($node)) {
-            $end = $node['value'];
-        }
-        $acc[] = "{$tab}{$sign} {$node['key']}: {$end}";
-        
-        if ($digDeep) {
-            $acc[] = renderer($digDeep, $tab . "    ");
-        }
-        
-        if (isValueIsObject($node)) {
-            $acc[] = renderObject(get_object_vars($node['value']), $tab);
-        }
-        
-        if (isValueIsObject($node) || $digDeep) {
-            $acc[] = "{$tab}  }";
-        }
-        
-        return $acc;
-    }, []);
-    
-    if ($tab === "  ") {
-        $result[] = "}";
-    }
-    $resultFlatten = flattenAll($result);
-    $resultString = implode("\n", $resultFlatten);
-    return $resultString;
-}
-
-function renderObject($node, $tab)
-{
-    $result = [];
-    foreach ($node as $key => $value) {
-        $result[] = "{$tab}      {$key}: {$value}";
-    }
-    return $result;
-}
-
-function isSame($node)
-{
-    if (isset($node['type'])) {
-        if ($node['type'] === 'same') {
-            return true;
-        }
-    }
-    return false;
-}
-
-function isRemoved($node)
-{
-    if (isset($node['type'])) {
-        if ($node['type'] === 'removed') {
-            return true;
-        }
-    }
-    return false;
-}
-
-function isAdded($node)
-{
-    if (isset($node['type'])) {
-        if ($node['type'] === 'added') {
-            return true;
-        }
-    }
-    return false;
-}
-
-function getSign($node)
-{
-    if (isChildren($node) || isSame($node)) {
-        return " ";
-    } elseif (isRemoved($node)) {
-        return "-";
-    } elseif (isAdded($node)) {
-        return "+";
-    } else {
-        return "?";
-    }
-}
-
-function isValueIsValue($node)
-{
-    if (isset($node['value'])) {
-        if ($node['value'] !== null && !is_object($node['value'])) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function isValueIsObject($node)
-{
-    if (isset($node['value'])) {
-        if (is_object($node['value'])) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function isNode($node)
-{
-    if (isset($node['type'])) {
-        if (in_array($node['type'], ['same', 'added', 'removed'])) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function isChildren($node)
-{
-    if (isset($node['type'])) {
-        if ($node['type'] === 'children') {
-            return true;
-        }
-    }
-    return false;
 }
 
 function booleazator($value)

@@ -13,3 +13,8 @@ function getFilesContent($filePaths)
     }
     return [file_get_contents($path1), file_get_contents($path2)];
 }
+
+function getFileExtension($path)
+{
+    return pathinfo($path, $options = PATHINFO_EXTENSION);
+}

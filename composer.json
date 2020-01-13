@@ -30,6 +30,9 @@
             "Differ\\": "src"
         },
         "files": [
+            "src/Formatters/Common.php",
+            "src/Formatters/Plain.php",
+            "src/Formatters/Json.php",
             "src/DocoptDriver.php",
             "src/FileDriver.php",
             "src/Analyzer.php",
