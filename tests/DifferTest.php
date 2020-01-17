@@ -8,7 +8,7 @@ use function Differ\Analyzer\genDiff;
 
 class DifferTest extends TestCase
 {
-    public function testPlainJson()
+    public function testJson()
     {
         $expectedPath = __DIR__ . '/fixtures/result.json';
         $beforePath = __DIR__ . '/fixtures/before.json';
@@ -17,7 +17,7 @@ class DifferTest extends TestCase
         $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
     }
     
-    public function testPlainYml()
+    public function testYml()
     {
         $expectedPath = __DIR__ . '/fixtures/result.json';
         $beforePath = __DIR__ . '/fixtures/before.yml';
@@ -26,7 +26,7 @@ class DifferTest extends TestCase
         $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
     }
     
-    public function testPlainJsonYml()
+    public function testJsonYml()
     {
         $expectedPath = __DIR__ . '/fixtures/result.json';
         $beforePath = __DIR__ . '/fixtures/before.json';
@@ -35,7 +35,7 @@ class DifferTest extends TestCase
         $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
     }
     
-    public function testPlainYmlJson()
+    public function testYmlJson()
     {
         $expectedPath = __DIR__ . '/fixtures/result.json';
         $beforePath = __DIR__ . '/fixtures/before.yml';
@@ -85,6 +85,6 @@ class DifferTest extends TestCase
         $beforePath = __DIR__ . '/fixtures/before2.json';
         $afterPath = __DIR__ . '/fixtures/after2.json';
         $expectedResult = file_get_contents($expectedPath);
-        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'json'));
+        $this->assertEquals($expectedResult, genDiff($beforePath, $afterPath, 'plain'));
     }
 }

@@ -37,12 +37,13 @@ function genDiff($path1, $path2, $format)
     return $rendered;
 }
 
-function makeNode($type, $key, $value, $children)
+function makeNode($type, $key, $oldValue, $newValue, $children)
 {
     return [
         'type' => $type,
         'key' => $key,
-        'value' => $value,
+        'oldValue' => $oldValue,
+        'newValue' => $newValue,
         'children' => $children
     ];
 }
@@ -52,26 +53,31 @@ function makeAst($array1, $array2)
     $keys = union(array_keys($array1), array_keys($array2));
     $result = array_reduce($keys, function ($acc, $key) use ($array1, $array2) {
         if (!array_key_exists($key, $array1)) {
-            $acc[] = makeNode('added', $key, booleazator($array2[$key]), null);
+            $acc[] = makeNode('added', $key, null, booleazator($array2[$key]), null);
             return $acc;
         }
         if (!array_key_exists($key, $array2)) {
-            $acc[] = makeNode('removed', $key, booleazator($array1[$key]), null);
+            $acc[] = makeNode('removed', $key, booleazator($array1[$key]), null, null);
             return $acc;
         }
         if ($array1[$key] === $array2[$key]) {
-            $acc[] = makeNode('same', $key, booleazator($array1[$key]), null);
+            $acc[] = makeNode('same', $key, booleazator($array1[$key]), booleazator($array2[$key]), null);
             return $acc;
         }
+        
         if (is_object($array1[$key]) && is_object($array2[$key])) {
-            $deeperData1 = get_object_vars($array1[$key]);
-            $deeperData2 = get_object_vars($array2[$key]);
-            $acc[] = makeNode('children', $key, null, makeAst($deeperData1, $deeperData2));
+            if ($array1[$key] != $array2[$key]) {
+                $deeperData1 = get_object_vars($array1[$key]);
+                $deeperData2 = get_object_vars($array2[$key]);
+                $acc[] = makeNode('children', $key, null, null, makeAst($deeperData1, $deeperData2));
+            } else {
+                $deeperData = get_object_vars($array1[$key]);
+                $acc[] = makeNode('same', $key, $deeperData, $deeperData, null);
+            }
             return $acc;
         }
         if ($array1[$key] !== $array2[$key]) {
-            $acc[] = makeNode('added', $key, booleazator($array2[$key]), null);
-            $acc[] = makeNode('removed', $key, booleazator($array1[$key]), null);
+            $acc[] = makeNode('changed', $key, booleazator($array1[$key]), booleazator($array2[$key]), null);
             return $acc;
         }
     }, []);

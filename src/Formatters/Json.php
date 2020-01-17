@@ -4,109 +4,93 @@ namespace Differ\Formatters\Json;
 
 use function Funct\Collection\flattenAll;
 use function Differ\Formatters\Common\isChildren;
+use function Differ\Formatters\Common\getKey;
+use function Differ\Formatters\Common\getNewValue;
 
-function renderJson(array $array, $tab = "  ")
+function renderJson(array $array, $tab = "")
 {
     $result = [];
-    if ($tab === "  ") {
-        $result[] = "{";
+    if ($tab === "") {
+        $result[] = '{';
     }
     
     $result[] = array_reduce($array, function ($acc, $node) use ($tab) {
-        $sign = getSign($node);
-        $digDeep = 0;
-        if (isValueIsObject($node)) {
-            $end = "{";
+        $key = getKey($node);
+        if (isChanged($node)) {
+            if (is_object(getOldValue($node))) {
+            } else {
+                $oldValue = getOldValue($node);
+            }
+            if (is_object(getNewValue($node))) {
+            } else {
+                $newValue = getNewValue($node);
+            }
+            $acc[] = "{$tab}  + {$key}: {$newValue}";
+            $acc[] = "{$tab}  - {$key}: {$oldValue}";
         }
+        
         if (isChildren($node)) {
-            $end = "{";
-            $digDeep = $node['children'];
-        }
-        if (isValueIsValue($node)) {
-            $end = $node['value'];
-        }
-        $acc[] = "{$tab}{$sign} {$node['key']}: {$end}";
-        
-        if ($digDeep) {
-            $acc[] = renderJson($digDeep, $tab . "    ");
+            $acc[] = "{$tab}    {$key}: {";
+            $acc[] = renderJson(getChildren($node), $tab . "    ");
+            $acc[] = "{$tab}    }";
         }
         
-        if (isValueIsObject($node)) {
-            $acc[] = renderObject(get_object_vars($node['value']), $tab);
+        if (isSame($node)) {
+            if (is_object(getNewValue($node))) {
+                $acc[] = "{$tab}    {$key}: {";
+                $acc[] = renderObject(getBewValue($node), $tab);
+                $acc[] = "{$tab}    }";
+            } else {
+                $value = getNewValue($node);
+                $acc[] = "{$tab}    {$key}: {$value}";
+            }
         }
         
-        if (isValueIsObject($node) || $digDeep) {
-            $acc[] = "{$tab}  }";
+        if (isRemoved($node)) {
+            if (is_object(getOldValue($node))) {
+                $acc[] = "{$tab}  - {$key}: {";
+                $acc[] = renderObject(getOldValue($node), $tab);
+                $acc[] = "{$tab}    }";
+            } else {
+                $oldValue = getOldValue($node);
+                $acc[] = "{$tab}  - {$key}: {$oldValue}";
+            }
         }
         
+        if (isAdded($node)) {
+            if (is_object(getNewValue($node))) {
+                $acc[] = "{$tab}  + {$key}: {";
+                $acc[] = renderObject(getNewValue($node), $tab);
+                $acc[] = "{$tab}    }";
+            } else {
+                $newValue = getNewValue($node);
+                $acc[] = "{$tab}  + {$key}: {$newValue}";
+            }
+        }
+
         return $acc;
     }, []);
     
-    if ($tab === "  ") {
+    if ($tab === "") {
         $result[] = "}";
+        return implode("\n", flattenAll($result));
     }
-    $resultFlatten = flattenAll($result);
-    $resultString = implode("\n", $resultFlatten);
-    return $resultString;
+    
+    return flattenAll($result);
 }
 
-function renderObject($node, $tab)
+function renderObject($object, $tab)
 {
     $result = [];
-    foreach ($node as $key => $value) {
-        if (!is_object($value)) {
-            $result[] = "{$tab}      {$key}: {$value}";
+    $array = get_object_vars($object);
+    foreach ($array as $key => $value) {
+        if (is_object($value)) {
         } else {
-            $result[] = "{$tab}      {$key}: {";
-            $result[] = renderObject($value, $tab . "    ");
-            $result[] = "{$tab}      }";
+            $result[] = "{$tab}        {$key}: {$value}";
         }
     }
+    
     return $result;
-}
-
-
-function getSign($node)
-{
-    if (isChildren($node) || isSame($node)) {
-        return " ";
-    } elseif (isRemoved($node)) {
-        return "-";
-    } elseif (isAdded($node)) {
-        return "+";
-    } else {
-        return "?";
-    }
-}
-
-function isValueIsObject($node)
-{
-    if (isset($node['value'])) {
-        if (is_object($node['value'])) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function isValueIsValue($node)
-{
-    if (isset($node['value'])) {
-        if ($node['value'] !== null && !is_object($node['value'])) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function isSame($node)
-{
-    if (isset($node['type'])) {
-        if ($node['type'] === 'same') {
-            return true;
-        }
-    }
-    return false;
 }
 
 function isRemoved($node)
@@ -129,12 +113,43 @@ function isAdded($node)
     return false;
 }
 
-function isNode($node)
+function isSame($node)
 {
     if (isset($node['type'])) {
-        if (in_array($node['type'], ['same', 'added', 'removed'])) {
+        if ($node['type'] === 'same') {
             return true;
         }
     }
     return false;
+}
+
+function isChanged($node)
+{
+    if (isset($node['type'])) {
+        if ($node['type'] === 'changed') {
+            return true;
+        }
+    }
+    return false;
+}
+
+function isSigned($node)
+{
+    if (isChildren($node) || isSame($node)) {
+        return false;
+    }
+    return true;
+}
+
+function getOldValue($node)
+{
+    if (isset($node['oldValue'])) {
+        return $node['oldValue'];
+    }
+    return null;
+}
+
+function getChildren($node)
+{
+    return isset($node['children']) ? $node['children'] : null;
 }

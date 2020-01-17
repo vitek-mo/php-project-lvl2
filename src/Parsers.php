@@ -4,7 +4,6 @@ namespace Differ\Parsers;
 
 use Symfony\Component\Yaml\Yaml;
 
-
 function parse($contents, $formats)
 {
     [$content1, $content2] = $contents;

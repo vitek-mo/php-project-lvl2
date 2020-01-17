@@ -11,3 +11,23 @@ function isChildren($node)
     }
     return false;
 }
+
+function getKey($node)
+{
+    return isset($node['key']) ? $node['key'] : null;
+}
+
+function getType($node)
+{
+    return isset($node['type']) ? $node['type'] : null;
+}
+
+function getNewValue($node)
+{
+    return isset($node['newValue']) ? $node['newValue'] : null;
+}
+
+function getOldValue($node)
+{
+    return isset($node['oldValue']) ? $node['oldValue'] : null;
+}
