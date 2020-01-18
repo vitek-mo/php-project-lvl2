@@ -6,8 +6,9 @@ use function Differ\Parsers\parse;
 use function Funct\Collection\union;
 use function Differ\FileDriver\getFilesContent;
 use function Differ\FileDriver\getFileExtension;
-use function Differ\Formatters\Json\renderJson;
+use function Differ\Formatters\Pretty\renderPretty;
 use function Differ\Formatters\Plain\renderPlain;
+use function Differ\Formatters\Json\renderJson;
 
 function genDiff($path1, $path2, $format)
 {
@@ -30,9 +31,10 @@ function genDiff($path1, $path2, $format)
     $dif = makeAst($array1, $array2);
     if ($format === 'json') {
         $rendered = renderJson($dif);
-    }
-    if ($format === 'plain') {
+    } elseif ($format === 'plain') {
         $rendered = renderPlain($dif);
+    } else {
+        $rendered = renderPretty($dif);
     }
     return $rendered;
 }
@@ -53,15 +55,15 @@ function makeAst($array1, $array2)
     $keys = union(array_keys($array1), array_keys($array2));
     $result = array_reduce($keys, function ($acc, $key) use ($array1, $array2) {
         if (!array_key_exists($key, $array1)) {
-            $acc[] = makeNode('added', $key, null, booleazator($array2[$key]), null);
+            $acc[] = makeNode('added', $key, null, $array2[$key], null);
             return $acc;
         }
         if (!array_key_exists($key, $array2)) {
-            $acc[] = makeNode('removed', $key, booleazator($array1[$key]), null, null);
+            $acc[] = makeNode('removed', $key, $array1[$key], null, null);
             return $acc;
         }
         if ($array1[$key] === $array2[$key]) {
-            $acc[] = makeNode('same', $key, booleazator($array1[$key]), booleazator($array2[$key]), null);
+            $acc[] = makeNode('same', $key, $array1[$key], $array2[$key], null);
             return $acc;
         }
         
@@ -77,18 +79,9 @@ function makeAst($array1, $array2)
             return $acc;
         }
         if ($array1[$key] !== $array2[$key]) {
-            $acc[] = makeNode('changed', $key, booleazator($array1[$key]), booleazator($array2[$key]), null);
+            $acc[] = makeNode('changed', $key, $array1[$key], $array2[$key], null);
             return $acc;
         }
     }, []);
     return $result;
-}
-
-function booleazator($value)
-{
-    if (is_bool($value)) {
-        return $value ? 'true' : 'false';
-    } else {
-        return $value;
-    }
 }

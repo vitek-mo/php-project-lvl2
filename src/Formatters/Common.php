@@ -2,6 +2,15 @@
 
 namespace Differ\Formatters\Common;
 
+function checkForBool($value)
+{
+    if (is_bool($value)) {
+        return $value ? "true" : "false";
+    } else {
+        return $value;
+    }
+}
+
 function isChildren($node)
 {
     if (isset($node['type'])) {
@@ -30,4 +39,9 @@ function getNewValue($node)
 function getOldValue($node)
 {
     return isset($node['oldValue']) ? $node['oldValue'] : null;
+}
+
+function getChildren($node)
+{
+    return isset($node['children']) ? $node['children'] : null;
 }
