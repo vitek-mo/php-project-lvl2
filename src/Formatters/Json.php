@@ -64,6 +64,7 @@ function renderInternalFields($upper, $node, $tab)
     $result = [];
     $type = getType($node);
     $result[] = "{$tab}\"type\": \"{$type}\",";
+
     switch ($type) {
         case "children":
             $result[] = "{$tab}\"children\": {";
@@ -71,42 +72,13 @@ function renderInternalFields($upper, $node, $tab)
             $result[] = "{$tab}}";
             break;
         case "same":
-            $value = getNewValue($node);
-            $nested = is_array($value) || is_object($value);
-            if ($nested) {
-                if (is_object($value)) {
-                    $result[] = "{$tab}\"value\": {";
-                    $result[] = "{$tab}    render object here";
-                    $result[] = "{$tab}}";
-                }
-            } else {
-                $endValue = prepareValue($value);
-                $result[] = "{$tab}\"value\": {$endValue}";
-            }
-            break;
         case "removed":
-            $value = getOldValue($node);
-            $nested = is_array($value) || is_object($value);
-            if ($nested) {
-                if (is_object($value)) {
-                    $result[] = "{$tab}\"value\": {";
-                    $result[] = renderObject($value, $tab . "    ");
-                    $result[] = "{$tab}}";
-                }
-            } else {
-                $endValue = prepareValue($value);
-                $result[] = "{$tab}\"value\": {$endValue}";
-            }
-            break;
         case "added":
-            $value = getNewValue($node);
-            $nested = is_array($value) || is_object($value);
-            if ($nested) {
-                if (is_object($value)) {
-                    $result[] = "{$tab}\"value\": {";
-                    $result[] = renderObject($value, $tab . "    ");
-                    $result[] = "{$tab}}";
-                }
+            $value = $type === "removed" ? getOldValue($node) : getNewValue($node);
+            if (is_object($value)) {
+                $result[] = "{$tab}\"value\": {";
+                $result[] = renderObject($value, $tab . "    ");
+                $result[] = "{$tab}}";
             } else {
                 $endValue = prepareValue($value);
                 $result[] = "{$tab}\"value\": {$endValue}";
@@ -114,25 +86,19 @@ function renderInternalFields($upper, $node, $tab)
             break;
         case "changed":
             $oldValue = getOldValue($node);
-            $oldNested = is_array($oldValue) || is_object($oldValue);
-            if ($oldNested) {
-                if (is_object($oldValue)) {
-                    $result[] = "{$tab}\"oldValue\": {";
-                    $result[] = renderObject($oldValue, $tab . "    ");
-                    $result[] = "{$tab}}";
-                }
+            if (is_object($oldValue)) {
+                $result[] = "{$tab}\"oldValue\": {";
+                $result[] = renderObject($oldValue, $tab . "    ");
+                $result[] = "{$tab}}";
             } else {
                 $endValue = prepareValue($oldValue);
                 $result[] = "{$tab}\"oldValue\": {$endValue},";
             }
             $newValue = getNewValue($node);
-            $newNested = is_array($newValue) || is_object($newValue);
-            if ($newNested) {
-                if (is_object($newValue)) {
-                    $result[] = "{$tab}\"newValue\": {";
-                    $result[] = renderObject($newValue, $tab . "    ");
-                    $result[] = "{$tab}}";
-                }
+            if (is_object($newValue)) {
+                $result[] = "{$tab}\"newValue\": {";
+                $result[] = renderObject($newValue, $tab . "    ");
+                $result[] = "{$tab}}";
             } else {
                 $endValue = prepareValue($newValue);
                 $result[] = "{$tab}\"newValue\": {$endValue}";
