@@ -17,7 +17,7 @@ function renderJson($upper, $tab = "    ")
     if ($tab === "    ") {
         $result[] = "{";
     }
-    $result[] = array_reduce($upper, function($acc, $node) use ($tab, $upper) {
+    $result[] = array_reduce($upper, function ($acc, $node) use ($tab, $upper) {
         $acc[] = renderKeyStart($node, $tab);
         $acc[] = renderInternalFields($upper, $node, $tab . "    ");
         $acc[] = renderKeyFinish($upper, $node, $tab);
@@ -31,9 +31,9 @@ function renderJson($upper, $tab = "    ")
 
 function isCommaRequired($upper, $node)
 {
-    $keys = array_map(function($node) {
+    $keys = array_map(function ($node) {
         return getKey($node);
-    },$upper);
+    }, $upper);
     $desiredKey = getKey($node);
     $keysCount = count($keys);
     $desiredIndex = array_search($desiredKey, $keys);
@@ -77,8 +77,8 @@ function renderInternalFields($upper, $node, $tab)
                 if (is_object($value)) {
                     $result[] = "{$tab}\"value\": {";
                     $result[] = "{$tab}    render object here";
-                    $result[] = "{$tab}}"; 
-                }                    
+                    $result[] = "{$tab}}";
+                }
             } else {
                 $endValue = prepareValue($value);
                 $result[] = "{$tab}\"value\": {$endValue}";
@@ -116,11 +116,11 @@ function renderInternalFields($upper, $node, $tab)
             $oldValue = getOldValue($node);
             $oldNested = is_array($oldValue) || is_object($oldValue);
             if ($oldNested) {
-               if (is_object($oldValue)) {
+                if (is_object($oldValue)) {
                     $result[] = "{$tab}\"oldValue\": {";
                     $result[] = renderObject($oldValue, $tab . "    ");
                     $result[] = "{$tab}}";
-               }
+                }
             } else {
                 $endValue = prepareValue($oldValue);
                 $result[] = "{$tab}\"oldValue\": {$endValue},";
