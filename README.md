@@ -10,6 +10,8 @@ Supported files types:
  - JSON
  - YAML
 File should have appropriate extension to correctly interpret file type it - "json" or "yml".
+
+<B>Installation</B>
 Can be installed globally with composer using
 ```
 composer require global viktor/differ:dev-master
