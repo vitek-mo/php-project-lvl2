@@ -25,8 +25,8 @@ function renderJson($upper, $tab = "    ")
     }, []);
     if ($tab === "    ") {
         $result[] = "}";
+        $result[] = "";
     }
-    $result[] = "";
     return implode("\n", flattenAll($result));
 }
 
