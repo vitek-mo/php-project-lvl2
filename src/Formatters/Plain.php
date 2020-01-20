@@ -46,5 +46,8 @@ function renderPlain($dif, $path = '')
             return $acc;
         }
     }, []);
+    if ($path === '') {
+        $result[] = "";
+    }
     return implode("\n", flattenAll($result));
 }

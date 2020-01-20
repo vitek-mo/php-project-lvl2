@@ -75,6 +75,7 @@ function renderPretty(array $array, $tab = "")
     
     if ($tab === "") {
         $result[] = "}";
+        $result[] = '';
         return implode("\n", flattenAll($result));
     }
     
