@@ -9,9 +9,6 @@ if (file_exists($autoloadPath1)) {
     require_once $autoloadPath2;
 }
 
-use function Differ\DocoptDriver\docoptInit;
-use function Differ\DocoptDriver\getPaths;
-
 const VERSION = 'Generate diff 0.1';
 const DOC = <<<DOC
 
@@ -31,8 +28,9 @@ Options:
 DOC;
 
 $params = array('version'=>VERSION);
-$args = docoptInit(DOC, $params);
+$args = \Docopt::handle(DOC, $params);
 $format = $args->args['--format'];
-[$path1, $path2] = getPaths($args);
+$path1 = $args->args['<firstFile>'];
+$path2 = $args->args['<secondFile>'];
     
 print_r(\Differ\Analyzer\genDiff($path1, $path2, $format));
