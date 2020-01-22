@@ -1,13 +1,12 @@
 #!/usr/bin/env php
 <?php
 
-$devPath = __DIR__ . '/../vendor/autoload.php';
-$absoluteDevPath = '/home/viktor/hexlet/PHP/projects/php-project-lvl2/vendor/autoload.php';
-
-if (file_exists($devPath)) {
-    require_once($devPath);
+$autoloadPath1 = __DIR__ . '/../../../autoload.php';
+$autoloadPath2 = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($autoloadPath1)) {
+    require_once $autoloadPath1;
 } else {
-    require_once($absoluteDevPath);
+    require_once $autoloadPath2;
 }
 
 use function Differ\DocoptDriver\docoptInit;
