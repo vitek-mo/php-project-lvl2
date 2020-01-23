@@ -6,60 +6,39 @@ use PHPUnit\Framework\TestCase;
 
 use function Differ\Analyzer\genDiff;
 
-function pathsBuild($firstFormat, $secondFormat, $outputFormat)
+function getExpectedResult($outputFormat)
 {
-    $beforePath = __DIR__ . '/fixtures/before.' . $firstFormat;
-    $afterPath = __DIR__ . '/fixtures/after.' . $secondFormat;
-    if ($outputFormat === 'pretty') {
-        $expectedPath = __DIR__ . '/fixtures/result';
-    } else {
-        $expectedPath = __DIR__ . '/fixtures/result.' . $outputFormat;
-    }
-    return [$beforePath, $afterPath, $expectedPath];
+    $expectedPath = $outputFormat === 'pretty' ? __DIR__ . '/fixtures/result' : __DIR__ . '/fixtures/result.' . $outputFormat;
+    return file_get_contents($expectedPath);
 }
 
-function getData($firstFormat, $secondFormat, $outputFormat)
+function getActualResult($inputFormatBefore, $inputFormatAfter, $outputFormat)
 {
-    [$beforePath, $afterPath, $expectedPath] = pathsBuild($firstFormat, $secondFormat, $outputFormat);
-    $expectedResult = file_get_contents($expectedPath);
-    $actualResult = genDiff($beforePath, $afterPath, $outputFormat);
-    return [$expectedResult, $actualResult];
+    $inputPathBefore = __DIR__ . '/fixtures/before.' . $inputFormatBefore;
+    $inputPathAfter = __DIR__ . '/fixtures/after.' . $inputFormatAfter;
+    return genDiff($inputPathBefore, $inputPathAfter, $outputFormat);
 }
 
 class DifferTest extends TestCase
 {
-    public function testNestedJson()
+    /**
+    * @dataProvider provider
+    */
+    
+    public function testGendiff($expectedResult, $actualResult)
     {
-        [$expectedResult, $actualResult] = getData('json', 'json', 'pretty');
         $this->assertEquals($expectedResult, $actualResult);
     }
     
-    public function testNestedYml()
+    public function provider()
     {
-        [$expectedResult, $actualResult] = getData('yml', 'yml', 'pretty');
-        $this->assertEquals($expectedResult, $actualResult);
-    }
-    
-    public function testNestedJsonYml()
-    {
-        [$expectedResult, $actualResult] = getData('json', 'yml', 'pretty');
-        $this->assertEquals($expectedResult, $actualResult);
-    }
-    public function testNestedYmlJson()
-    {
-        [$expectedResult, $actualResult] = getData('yml', 'json', 'pretty');
-        $this->assertEquals($expectedResult, $actualResult);
-    }
-    
-    public function testNestedToPlain()
-    {
-        [$expectedResult, $actualResult] = getData('json', 'json', 'plain');
-        $this->assertEquals($expectedResult, $actualResult);
-    }
-    
-    public function testNestedToJson()
-    {
-        [$expectedResult, $actualResult] = getData('json', 'json', 'json');
-        $this->assertEquals($expectedResult, $actualResult);
+        return array(
+            array(getExpectedResult('pretty'), getActualResult('json', 'json', 'pretty')),
+            array(getExpectedResult('pretty'), getActualResult('yml', 'yml', 'pretty')),
+            array(getExpectedResult('pretty'), getActualResult('json', 'yml', 'pretty')),
+            array(getExpectedResult('pretty'), getActualResult('yml', 'json', 'pretty')),
+            array(getExpectedResult('plain'), getActualResult('json', 'json', 'plain')),
+            array(getExpectedResult('json'), getActualResult('json', 'json', 'json'))
+        );
     }
 }
