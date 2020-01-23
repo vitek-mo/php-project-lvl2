@@ -8,7 +8,8 @@ use function Differ\Analyzer\genDiff;
 
 function getExpectedResult($outputFormat)
 {
-    $expectedPath = $outputFormat === 'pretty' ? __DIR__ . '/fixtures/result' : __DIR__ . '/fixtures/result.' . $outputFormat;
+    $basePath = __DIR__ . '/fixtures/result';
+    $expectedPath = $outputFormat === 'pretty' ? $basePath : $basePath . '.' . $outputFormat;
     return file_get_contents($expectedPath);
 }
 
