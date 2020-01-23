@@ -28,7 +28,9 @@ class DifferTest extends TestCase
     
     public function testGendiff($outputFormat, $inputFormatBefore, $inputFormatAfter)
     {
-        $this->assertEquals(getExpectedResult($outputFormat), getActualResult($inputFormatBefore, $inputFormatAfter, $outputFormat));
+        $expectedResult = getExpectedResult($outputFormat);
+        $actualResult = getActualResult($inputFormatBefore, $inputFormatAfter, $outputFormat);
+        $this->assertEquals($expectedResult, $actualResult);
     }
     
     public function provider()
