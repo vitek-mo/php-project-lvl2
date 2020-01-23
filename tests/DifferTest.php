@@ -26,20 +26,20 @@ class DifferTest extends TestCase
     * @dataProvider provider
     */
     
-    public function testGendiff($expectedResult, $actualResult)
+    public function testGendiff($outputFormat, $inputFormatBefore, $inputFormatAfter)
     {
-        $this->assertEquals($expectedResult, $actualResult);
+        $this->assertEquals(getExpectedResult($outputFormat), getActualResult($inputFormatBefore, $inputFormatAfter, $outputFormat));
     }
     
     public function provider()
     {
         return array(
-            array(getExpectedResult('pretty'), getActualResult('json', 'json', 'pretty')),
-            array(getExpectedResult('pretty'), getActualResult('yml', 'yml', 'pretty')),
-            array(getExpectedResult('pretty'), getActualResult('json', 'yml', 'pretty')),
-            array(getExpectedResult('pretty'), getActualResult('yml', 'json', 'pretty')),
-            array(getExpectedResult('plain'), getActualResult('json', 'json', 'plain')),
-            array(getExpectedResult('json'), getActualResult('json', 'json', 'json'))
+            array('pretty', 'json', 'json'),
+            array('pretty', 'yml', 'yml'),
+            array('pretty', 'json', 'yml'),
+            array('pretty', 'yml', 'json'),
+            array('plain', 'json', 'json'),
+            array('json', 'json', 'json')
         );
     }
 }
