@@ -8,15 +8,14 @@ use function Differ\Analyzer\genDiff;
 
 function getExpectedResult($outputFormat)
 {
-    $basePath = __DIR__ . '/fixtures/result';
-    $expectedPath = $outputFormat === 'pretty' ? $basePath : $basePath . '.' . $outputFormat;
+    $expectedPath = __DIR__ . '/fixtures/output/result.' . $outputFormat;
     return file_get_contents($expectedPath);
 }
 
 function getActualResult($inputFormatBefore, $inputFormatAfter, $outputFormat)
 {
-    $inputPathBefore = __DIR__ . '/fixtures/before.' . $inputFormatBefore;
-    $inputPathAfter = __DIR__ . '/fixtures/after.' . $inputFormatAfter;
+    $inputPathBefore = __DIR__ . '/fixtures/input/before.' . $inputFormatBefore;
+    $inputPathAfter = __DIR__ . '/fixtures/input/after.' . $inputFormatAfter;
     return genDiff($inputPathBefore, $inputPathAfter, $outputFormat);
 }
 
@@ -35,13 +34,13 @@ class DifferTest extends TestCase
     
     public function provider()
     {
-        return array(
-            array('pretty', 'json', 'json'),
-            array('pretty', 'yml', 'yml'),
-            array('pretty', 'json', 'yml'),
-            array('pretty', 'yml', 'json'),
-            array('plain', 'json', 'json'),
-            array('json', 'json', 'json')
-        );
+        return [
+            ['pretty', 'json', 'json'],
+            ['pretty', 'yml', 'yml'],
+            ['pretty', 'json', 'yml'],
+            ['pretty', 'yml', 'json'],
+            ['plain', 'json', 'json'],
+            ['json', 'json', 'json']
+        ];
     }
 }

@@ -1,0 +1,96 @@
+[
+    {
+        "type": "children",
+        "key": "common",
+        "oldValue": null,
+        "newValue": null,
+        "children": [
+            {
+                "type": "same",
+                "key": "setting1",
+                "oldValue": "Value 1",
+                "newValue": "Value 1",
+                "children": null
+            },
+            {
+                "type": "removed",
+                "key": "setting2",
+                "oldValue": "200",
+                "newValue": null,
+                "children": null
+            },
+            {
+                "type": "same",
+                "key": "setting3",
+                "oldValue": true,
+                "newValue": true,
+                "children": null
+            },
+            {
+                "type": "removed",
+                "key": "setting6",
+                "oldValue": {
+                    "key": "value"
+                },
+                "newValue": null,
+                "children": null
+            },
+            {
+                "type": "added",
+                "key": "setting4",
+                "oldValue": null,
+                "newValue": "blah blah",
+                "children": null
+            },
+            {
+                "type": "added",
+                "key": "setting5",
+                "oldValue": null,
+                "newValue": {
+                    "key5": "value5"
+                },
+                "children": null
+            }
+        ]
+    },
+    {
+        "type": "children",
+        "key": "group1",
+        "oldValue": null,
+        "newValue": null,
+        "children": [
+            {
+                "type": "changed",
+                "key": "baz",
+                "oldValue": "bas",
+                "newValue": "bars",
+                "children": null
+            },
+            {
+                "type": "same",
+                "key": "foo",
+                "oldValue": "bar",
+                "newValue": "bar",
+                "children": null
+            }
+        ]
+    },
+    {
+        "type": "removed",
+        "key": "group2",
+        "oldValue": {
+            "abc": "12345"
+        },
+        "newValue": null,
+        "children": null
+    },
+    {
+        "type": "added",
+        "key": "group3",
+        "oldValue": null,
+        "newValue": {
+            "fee": "100500"
+        },
+        "children": null
+    }
+]

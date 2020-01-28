@@ -13,35 +13,30 @@ function checkForBool($value)
 
 function isChildren($node)
 {
-    if (isset($node['type'])) {
-        if ($node['type'] === 'children') {
-            return true;
-        }
-    }
-    return false;
+    return (getType($node) === 'children') ?: false;
 }
 
 function getKey($node)
 {
-    return isset($node['key']) ? $node['key'] : null;
+    return $node['key'];
 }
 
 function getType($node)
 {
-    return isset($node['type']) ? $node['type'] : null;
+    return $node['type'];
 }
 
 function getNewValue($node)
 {
-    return isset($node['newValue']) ? $node['newValue'] : null;
+    return $node['newValue'];
 }
 
 function getOldValue($node)
 {
-    return isset($node['oldValue']) ? $node['oldValue'] : null;
+    return $node['oldValue'];
 }
 
 function getChildren($node)
 {
-    return isset($node['children']) ? $node['children'] : null;
+    return $node['children'];
 }

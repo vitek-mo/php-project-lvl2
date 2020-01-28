@@ -8,25 +8,24 @@ use function Differ\Formatters\Pretty\renderPretty;
 use function Differ\Formatters\Plain\renderPlain;
 use function Differ\Formatters\Json\renderJson;
 
-function genDiff($path1, $path2, $format)
+function genDiff($inputFilePath1, $inputFilePath2, $outputFormat)
 {
     
-    $content1 = getFileContent($path1);
-    $content2 = getFileContent($path2);
+    $rawContent1 = getFileContent($inputFilePath1);
+    $rawContent2 = getFileContent($inputFilePath2);
     
-    $outputFormat1 = pathinfo($path1, $options = PATHINFO_EXTENSION);
-    $outputFormat2 = pathinfo($path2, $options = PATHINFO_EXTENSION);
+    $fileExtension1 = pathinfo($inputFilePath1, $options = PATHINFO_EXTENSION);
+    $fileExtension2 = pathinfo($inputFilePath2, $options = PATHINFO_EXTENSION);
     
-    $obj1 = parse($content1, $outputFormat1);
-    $obj2 = parse($content2, $outputFormat2);
+    $object1 = parse($rawContent1, $fileExtension1);
+    $object2 = parse($rawContent2, $fileExtension2);
+    $object1Vars = get_object_vars($object1);
+    $object2Vars = get_object_vars($object2);
     
-    $array1 = get_object_vars($obj1);
-    $array2 = get_object_vars($obj2);
-    
-    $dif = makeDif($array1, $array2);
-    if ($format === 'json') {
+    $dif = makeDif($object1Vars, $object2Vars);
+    if ($outputFormat === 'json') {
         $rendered = renderJson($dif);
-    } elseif ($format === 'plain') {
+    } elseif ($outputFormat === 'plain') {
         $rendered = renderPlain($dif);
     } else {
         $rendered = renderPretty($dif);
@@ -85,7 +84,6 @@ function getFileContent($path)
 {
     if (!is_readable($path)) {
         throw new \Exception("'{$path}' is not exist or not readable.");
-        return null;
     }
     return file_get_contents($path);
 }
