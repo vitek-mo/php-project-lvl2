@@ -44,7 +44,7 @@ function renderPretty(array $array, $tab = "")
                     $acc[] = renderObject($nodeValue, $tab);
                     $acc[] = "{$tab}    }";
                 } else {
-                    $checedValue = checkForBool(getTypeBasedValue($node, $type));
+                    $checkedValue = checkForBool(getTypeBasedValue($node, $type));
                     $acc[] = "{$tab}  {$sign} {$key}: {$checkedValue}";
                 }
                 break;
