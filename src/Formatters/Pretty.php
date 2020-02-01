@@ -32,34 +32,20 @@ function renderPretty(array $array, $tab = "")
                 $acc[] = renderPretty(getChildren($node), $tab . "    ");
                 $acc[] = "{$tab}    }";
                 break;
+            // Folloing piece of code was refactored to remove duplicated code
+            // and unify code for different types.
             case 'same':
-                if (is_object(getNewValue($node))) {
-                    $acc[] = "{$tab}    {$key}: {";
-                    $acc[] = renderObject(getNewValue($node), $tab);
-                    $acc[] = "{$tab}    }";
-                } else {
-                    $value = checkForBool(getNewValue($node));
-                    $acc[] = "{$tab}    {$key}: {$value}";
-                }
-                break;
             case 'removed':
-                if (is_object(getOldValue($node))) {
-                    $acc[] = "{$tab}  - {$key}: {";
-                    $acc[] = renderObject(getOldValue($node), $tab);
-                    $acc[] = "{$tab}    }";
-                } else {
-                    $oldValue = checkForBool(getOldValue($node));
-                    $acc[] = "{$tab}  - {$key}: {$oldValue}";
-                }
-                break;
             case 'added':
-                if (is_object(getNewValue($node))) {
-                    $acc[] = "{$tab}  + {$key}: {";
-                    $acc[] = renderObject(getNewValue($node), $tab);
+                $sign = getSign($type);
+                $nodeValue = getTypeBasedValue($node, $type);
+                if (is_object($nodeValue)) {
+                    $acc[] = "{$tab}  {$sign} {$key}: {";
+                    $acc[] = renderObject($nodeValue, $tab);
                     $acc[] = "{$tab}    }";
                 } else {
-                    $newValue = checkForBool(getNewValue($node));
-                    $acc[] = "{$tab}  + {$key}: {$newValue}";
+                    $checedValue = checkForBool(getTypeBasedValue($node, $type));
+                    $acc[] = "{$tab}  {$sign} {$key}: {$checkedValue}";
                 }
                 break;
         }
@@ -73,6 +59,36 @@ function renderPretty(array $array, $tab = "")
     }
     
     return flattenAll($result);
+}
+
+function getTypeBasedValue($node, $type)
+{
+    switch ($type) {
+        case 'same':
+        case 'added':
+            $result = getNewValue($node);
+            break;
+        case 'removed':
+            $result = getOldValue($node);
+            break;
+    }
+    return $result;
+}
+
+function getSign($type)
+{
+    switch ($type) {
+        case 'same':
+            $sign = ' ';
+            break;
+        case 'added':
+            $sign = '+';
+            break;
+        case 'removed':
+            $sign = '-';
+            break;
+    }
+    return $sign;
 }
 
 function renderObject($object, $tab)
