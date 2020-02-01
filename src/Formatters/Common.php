@@ -11,9 +11,9 @@ function checkForBool($value)
     }
 }
 
-function isChildren($node)
+function isNested($node)
 {
-    return (getType($node) === 'children') ?: false;
+    return (getType($node) === 'nested') ?: false;
 }
 
 function getKey($node)

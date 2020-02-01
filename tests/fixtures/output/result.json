@@ -1,6 +1,6 @@
 [
     {
-        "type": "children",
+        "type": "nested",
         "key": "common",
         "oldValue": null,
         "newValue": null,
@@ -54,7 +54,7 @@
         ]
     },
     {
-        "type": "children",
+        "type": "nested",
         "key": "group1",
         "oldValue": null,
         "newValue": null,

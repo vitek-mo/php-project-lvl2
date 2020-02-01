@@ -44,36 +44,36 @@ function makeNode($type, $key, $oldValue, $newValue, $children)
     ];
 }
 
-function makeDif($array1, $array2)
+function makeDif($valueBefore, $valueAfter)
 {
-    $keys = union(array_keys($array1), array_keys($array2));
-    $result = array_reduce($keys, function ($acc, $key) use ($array1, $array2) {
-        if (!array_key_exists($key, $array1)) {
-            $acc[] = makeNode('added', $key, null, $array2[$key], null);
+    $keys = union(array_keys($valueBefore), array_keys($valueAfter));
+    $result = array_reduce($keys, function ($acc, $key) use ($valueBefore, $valueAfter) {
+        if (!array_key_exists($key, $valueBefore)) {
+            $acc[] = makeNode('added', $key, null, $valueAfter[$key], null);
             return $acc;
         }
-        if (!array_key_exists($key, $array2)) {
-            $acc[] = makeNode('removed', $key, $array1[$key], null, null);
+        if (!array_key_exists($key, $valueAfter)) {
+            $acc[] = makeNode('removed', $key, $valueBefore[$key], null, null);
             return $acc;
         }
-        if ($array1[$key] === $array2[$key]) {
-            $acc[] = makeNode('same', $key, $array1[$key], $array2[$key], null);
+        if ($valueBefore[$key] === $valueAfter[$key]) {
+            $acc[] = makeNode('same', $key, $valueBefore[$key], $valueAfter[$key], null);
             return $acc;
         }
         
-        if (is_object($array1[$key]) && is_object($array2[$key])) {
-            if ($array1[$key] != $array2[$key]) {
-                $deeperData1 = get_object_vars($array1[$key]);
-                $deeperData2 = get_object_vars($array2[$key]);
-                $acc[] = makeNode('children', $key, null, null, makeDif($deeperData1, $deeperData2));
+        if (is_object($valueBefore[$key]) && is_object($valueAfter[$key])) {
+            if ($valueBefore[$key] != $valueAfter[$key]) {
+                $deeperData1 = get_object_vars($valueBefore[$key]);
+                $deeperData2 = get_object_vars($valueAfter[$key]);
+                $acc[] = makeNode('nested', $key, null, null, makeDif($deeperData1, $deeperData2));
             } else {
-                $deeperData = get_object_vars($array1[$key]);
+                $deeperData = get_object_vars($valueBefore[$key]);
                 $acc[] = makeNode('same', $key, $deeperData, $deeperData, null);
             }
             return $acc;
         }
-        if ($array1[$key] !== $array2[$key]) {
-            $acc[] = makeNode('changed', $key, $array1[$key], $array2[$key], null);
+        if ($valueBefore[$key] !== $valueAfter[$key]) {
+            $acc[] = makeNode('changed', $key, $valueBefore[$key], $valueAfter[$key], null);
             return $acc;
         }
     }, []);

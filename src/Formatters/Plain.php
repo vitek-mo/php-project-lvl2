@@ -3,7 +3,7 @@
 namespace Differ\Formatters\Plain;
 
 use function Funct\Collection\flattenAll;
-use function Differ\Formatters\Common\isChildren;
+use function Differ\Formatters\Common\isNested;
 use function Differ\Formatters\Common\getKey;
 use function Differ\Formatters\Common\getType;
 use function Differ\Formatters\Common\getNewValue;
@@ -11,9 +11,8 @@ use function Differ\Formatters\Common\getOldValue;
 
 function renderPlain($dif, $path = '')
 {
-    $result = [];
     $result[] = array_reduce($dif, function ($acc, $node) use ($path) {
-        if (isChildren($node)) {
+        if (isNested($node)) {
             $key = getKey($node);
             $intPath = ($path === "") ? $key : "{$path}.{$key}";
             $acc[] = renderPlain($node['children'], $intPath);

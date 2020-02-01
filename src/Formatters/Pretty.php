@@ -3,7 +3,7 @@
 namespace Differ\Formatters\Pretty;
 
 use function Funct\Collection\flattenAll;
-use function Differ\Formatters\Common\isChildren;
+use function Differ\Formatters\Common\isNested;
 use function Differ\Formatters\Common\getKey;
 use function Differ\Formatters\Common\getType;
 use function Differ\Formatters\Common\getNewValue;
@@ -27,7 +27,7 @@ function renderPretty(array $array, $tab = "")
                 $acc[] = "{$tab}  + {$key}: {$newValue}";
                 $acc[] = "{$tab}  - {$key}: {$oldValue}";
                 break;
-            case 'children':
+            case 'nested':
                 $acc[] = "{$tab}    {$key}: {";
                 $acc[] = renderPretty(getChildren($node), $tab . "    ");
                 $acc[] = "{$tab}    }";
