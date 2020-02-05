@@ -44,10 +44,10 @@ function makeNode($type, $key, $oldValue, $newValue, $children)
     ];
 }
 
-function makediff($valueBefore, $valueAfter)
+function makeDiff($valueBefore, $valueAfter)
 {
     $keys = array_values(union(array_keys($valueBefore), array_keys($valueAfter)));
-    $result = array_map(function ($key) use ($valueBefore, $valueAfter) {
+    return array_map(function ($key) use ($valueBefore, $valueAfter) {
         if (!array_key_exists($key, $valueBefore)) {
             return makeNode('added', $key, null, $valueAfter[$key], null);
         }
@@ -71,7 +71,6 @@ function makediff($valueBefore, $valueAfter)
             return makeNode('changed', $key, $valueBefore[$key], $valueAfter[$key], null);
         }
     }, $keys);
-    return $result;
 }
 
 function getFileContent($path)
