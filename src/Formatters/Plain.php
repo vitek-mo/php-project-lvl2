@@ -8,45 +8,41 @@ use function Differ\Formatters\Common\getKey;
 use function Differ\Formatters\Common\getType;
 use function Differ\Formatters\Common\getNewValue;
 use function Differ\Formatters\Common\getOldValue;
+use function Differ\Formatters\Common\getChildren;
 
-function renderPlain($dif, $path = '')
+function renderPlain($diff, $path = '')
 {
-    $result[] = array_reduce($dif, function ($acc, $node) use ($path) {
-        if (isNested($node)) {
-            $key = getKey($node);
-            $intPath = ($path === "") ? $key : "{$path}.{$key}";
-            $acc[] = renderPlain($node['children'], $intPath);
-            return $acc;
-        } else {
-            if (getType($node) !== 'same') {
-                $key = getKey($node);
-                $property = $path === '' ? $key : "{$path}.{$key}";
-                $ending = "";
-                $value = "";
-                $action = getType($node);
-                if (is_object(getNewValue($node))) {
-                    $value = "complex value";
-                    $ending = " with value: '{$value}'";
-                } else {
-                    if (getType($node) === "added") {
-                        $value = getNewValue($node);
-                        $ending = " with value: '{$value}'";
-                    }
-                    if (getType($node) === "changed") {
-                        $oldValue = getOldValue($node);
-                        $newValue = getNewValue($node);
-                        $ending = ". From '{$oldValue}' to '{$newValue}'";
-                    }
-                }
-            } else {
-                return $acc;
-            }
-            $acc[] = "Property '{$property}' was {$action}{$ending}";
-            return $acc;
+    $result = array_map(function ($node) use ($path) {
+        $type = getType($node);
+        $key = getKey($node);
+        switch ($type) {
+            case 'nested':
+                $currentPath = ($path === '') ? "{$key}." : "{$path}{$key}.";
+                return renderPlain(getChildren($node), $currentPath);
+                break;
+            case 'removed':
+                $typeSpecificPart = "";
+                break;
+            case 'added':
+                $value = is_object(getNewValue($node)) ? 'complex value' : getNewValue($node);
+                $typeSpecificPart = " with value: '{$value}'";
+                break;
+            case 'changed':
+                $oldValue = is_object(getOldValue($node)) ? 'complex value' : getOldValue($node);
+                $newValue = is_object(getNewValue($node)) ? 'complex value' : getNewValue($node);
+                $typeSpecificPart = ". From '{$oldValue}' to '{$newValue}'";
+                break;
+            case 'same':
+                return;
+                break;
         }
-    }, []);
-    if ($path === '') {
-        $result[] = "";
-    }
-    return implode("\n", flattenAll($result));
+        $fullPath = "{$path}{$key}";
+        return "Property '{$fullPath}' was {$type}{$typeSpecificPart}";
+    }, $diff);
+    $filteredResult = array_filter($result, function ($sentence) {
+        return $sentence;
+    });
+
+    $flattenedResult = implode("\n", $filteredResult);
+    return $path === '' ? $flattenedResult . "\n" : $flattenedResult;
 }

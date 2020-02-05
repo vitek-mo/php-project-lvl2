@@ -22,13 +22,13 @@ function genDiff($inputFilePath1, $inputFilePath2, $outputFormat)
     $object1Vars = get_object_vars($object1);
     $object2Vars = get_object_vars($object2);
     
-    $dif = makeDif($object1Vars, $object2Vars);
+    $diff = makeDiff($object1Vars, $object2Vars);
     if ($outputFormat === 'json') {
-        $rendered = renderJson($dif);
+        $rendered = renderJson($diff);
     } elseif ($outputFormat === 'plain') {
-        $rendered = renderPlain($dif);
+        $rendered = renderPlain($diff);
     } else {
-        $rendered = renderPretty($dif);
+        $rendered = renderPretty($diff);
     }
     return $rendered;
 }
@@ -44,39 +44,33 @@ function makeNode($type, $key, $oldValue, $newValue, $children)
     ];
 }
 
-function makeDif($valueBefore, $valueAfter)
+function makediff($valueBefore, $valueAfter)
 {
-    $keys = union(array_keys($valueBefore), array_keys($valueAfter));
-    $result = array_reduce($keys, function ($acc, $key) use ($valueBefore, $valueAfter) {
+    $keys = array_values(union(array_keys($valueBefore), array_keys($valueAfter)));
+    $result = array_map(function ($key) use ($valueBefore, $valueAfter) {
         if (!array_key_exists($key, $valueBefore)) {
-            $acc[] = makeNode('added', $key, null, $valueAfter[$key], null);
-            return $acc;
+            return makeNode('added', $key, null, $valueAfter[$key], null);
         }
         if (!array_key_exists($key, $valueAfter)) {
-            $acc[] = makeNode('removed', $key, $valueBefore[$key], null, null);
-            return $acc;
+            return makeNode('removed', $key, $valueBefore[$key], null, null);
         }
         if ($valueBefore[$key] === $valueAfter[$key]) {
-            $acc[] = makeNode('same', $key, $valueBefore[$key], $valueAfter[$key], null);
-            return $acc;
+            return makeNode('same', $key, $valueBefore[$key], $valueAfter[$key], null);
         }
-        
         if (is_object($valueBefore[$key]) && is_object($valueAfter[$key])) {
             if ($valueBefore[$key] != $valueAfter[$key]) {
                 $deeperData1 = get_object_vars($valueBefore[$key]);
                 $deeperData2 = get_object_vars($valueAfter[$key]);
-                $acc[] = makeNode('nested', $key, null, null, makeDif($deeperData1, $deeperData2));
+                return makeNode('nested', $key, null, null, makediff($deeperData1, $deeperData2));
             } else {
                 $deeperData = get_object_vars($valueBefore[$key]);
-                $acc[] = makeNode('same', $key, $deeperData, $deeperData, null);
+                return makeNode('same', $key, $deeperData, $deeperData, null);
             }
-            return $acc;
         }
         if ($valueBefore[$key] !== $valueAfter[$key]) {
-            $acc[] = makeNode('changed', $key, $valueBefore[$key], $valueAfter[$key], null);
-            return $acc;
+            return makeNode('changed', $key, $valueBefore[$key], $valueAfter[$key], null);
         }
-    }, []);
+    }, $keys);
     return $result;
 }
 

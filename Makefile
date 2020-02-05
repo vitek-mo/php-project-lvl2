@@ -9,3 +9,6 @@ lint-fix:
 
 test:
 	composer run-script phpunit tests
+lt:
+	make lint
+	make test	
