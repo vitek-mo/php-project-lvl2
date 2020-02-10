@@ -3,105 +3,78 @@
 namespace Differ\Formatters\Pretty;
 
 use function Funct\Collection\flattenAll;
-use function Differ\Formatters\Common\isNested;
 use function Differ\Formatters\Common\getKey;
-use function Differ\Formatters\Common\getType;
+use function Differ\Formatters\Common\getNodeType;
 use function Differ\Formatters\Common\getNewValue;
 use function Differ\Formatters\Common\getOldValue;
 use function Differ\Formatters\Common\getChildren;
-use function Differ\Formatters\Common\checkForBool;
+use function Differ\Formatters\Common\ifBoolMakeString;
 
-function renderPretty(array $array, $tab = "")
+function renderPretty(array $array, $indent = "")
 {
-    if ($tab === "") {
-        $result[] = '{';
-    }
+    $openingBrace = $indent === "" ? "{\n" : "";
     
-    $result[] = array_reduce($array, function ($acc, $node) use ($tab) {
+    $result = array_reduce($array, function ($acc, $node) use ($indent) {
         $key = getKey($node);
-        $type = getType($node);
+        $type = getNodeType($node);
         switch ($type) {
             case 'changed':
-                $oldValue = checkForBool(getOldValue($node));
-                $newValue = checkForBool(getNewValue($node));
-                $acc[] = "{$tab}  + {$key}: {$newValue}";
-                $acc[] = "{$tab}  - {$key}: {$oldValue}";
-                break;
+                $acc[] = stringify($indent, $key, "+", getNewValue($node));
+                $acc[] = stringify($indent, $key, "-", getOldValue($node));
+                return $acc;
             case 'nested':
-                $acc[] = "{$tab}    {$key}: {";
-                $acc[] = renderPretty(getChildren($node), $tab . "    ");
-                $acc[] = "{$tab}    }";
-                break;
-            // Folloing piece of code was refactored to remove duplicated code
-            // and unify code for different types.
+                //вот тут ещё сомневаюсь, нужно ли и как в stringify значение типа Nested обрабатывать.
+                //тип возвращаемого значения getChildren будет array (массив из Node)
+                //можно сделать по этому отдельный case, в котором уже рекурсивно будет renderPretty вызываться
+                $acc[] = "{$indent}    {$key}: {";
+                $acc[] = renderPretty(getChildren($node), $indent . "    ");
+                $acc[] = "{$indent}    }";
+                return $acc;
             case 'same':
+                $sign = ' ';
+                $nodeValue = getNewValue($node);
+                break;
             case 'removed':
+                $sign = '-';
+                $nodeValue = getOldValue($node);
+                break;
             case 'added':
-                $sign = getSign($type);
-                $nodeValue = getTypeBasedValue($node, $type);
-                if (is_object($nodeValue)) {
-                    $acc[] = "{$tab}  {$sign} {$key}: {";
-                    $acc[] = renderObject($nodeValue, $tab);
-                    $acc[] = "{$tab}    }";
-                } else {
-                    $checkedValue = checkForBool(getTypeBasedValue($node, $type));
-                    $acc[] = "{$tab}  {$sign} {$key}: {$checkedValue}";
-                }
+                $sign = '+';
+                $nodeValue = getNewValue($node);
                 break;
         }
+        $acc[] = stringify($indent, $key, $sign, $nodeValue);
         return $acc;
     }, []);
+
+    $stringified = implode("\n", flattenAll($result));
+
+    $closingBrace = $indent === "" ? "\n}\n" : "";
     
-    if ($tab === "") {
-        $result[] = "}";
-        $result[] = '';
-        return implode("\n", flattenAll($result));
-    }
-    
-    return flattenAll($result);
+    return "{$openingBrace}{$stringified}{$closingBrace}";
 }
 
-function getTypeBasedValue($node, $type)
+function stringify($indent, $key, $sign, $nodeValue)
 {
-    switch ($type) {
-        case 'same':
-        case 'added':
-            $result = getNewValue($node);
+    switch (gettype($nodeValue)) {
+        case 'boolean':
+            $booleanStringified = $nodeValue ? "true" : "false";
+            $result = "{$indent}  {$sign} {$key}: {$booleanStringified}";
             break;
-        case 'removed':
-            $result = getOldValue($node);
+        case 'object':
+            $objectVars = get_object_vars($nodeValue);
+            $openingString = "{$indent}  {$sign} {$key}: {\n";
+            $objectKeys = array_keys($objectVars);
+            $valueStrings = array_map(function ($objectKey) use ($objectVars, $indent) {
+                return stringify($indent . "    ", $objectKey, " ", $objectVars[$objectKey]);
+            }, $objectKeys);
+            $valueString = implode("\n", $valueStrings);
+            $closingString = "{$indent}    }";
+            $result = "{$openingString}{$valueString}\n{$closingString}";
+            break;
+        default:
+            $result = "{$indent}  {$sign} {$key}: {$nodeValue}";
             break;
     }
-    return $result;
-}
-
-function getSign($type)
-{
-    switch ($type) {
-        case 'same':
-            $sign = ' ';
-            break;
-        case 'added':
-            $sign = '+';
-            break;
-        case 'removed':
-            $sign = '-';
-            break;
-    }
-    return $sign;
-}
-
-function renderObject($object, $tab)
-{
-    $result = [];
-    $objectVars = get_object_vars($object);
-    foreach ($objectVars as $key => $value) {
-        if (is_object($value)) {
-        } else {
-            $checkedForBool = checkForBool($value);
-            $result[] = "{$tab}        {$key}: {$checkedForBool}";
-        }
-    }
-    
     return $result;
 }

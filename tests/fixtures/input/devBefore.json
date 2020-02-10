@@ -22,5 +22,12 @@
   "wife": "Angelina",
   "car": {
     "maker": "Toyota"
+  },
+  "level1": {
+    "level2": {
+      "level3": {
+        "level4": "value"
+      }
+    }
   }
 }

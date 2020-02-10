@@ -2,7 +2,7 @@
 
 namespace Differ\Formatters\Common;
 
-function checkForBool($value)
+function ifBoolMakeString($value)
 {
     if (is_bool($value)) {
         return $value ? "true" : "false";
@@ -21,7 +21,7 @@ function getKey($node)
     return $node['key'];
 }
 
-function getType($node)
+function getNodeType($node)
 {
     return $node['type'];
 }

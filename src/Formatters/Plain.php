@@ -5,7 +5,7 @@ namespace Differ\Formatters\Plain;
 use function Funct\Collection\flattenAll;
 use function Differ\Formatters\Common\isNested;
 use function Differ\Formatters\Common\getKey;
-use function Differ\Formatters\Common\getType;
+use function Differ\Formatters\Common\getNodeType;
 use function Differ\Formatters\Common\getNewValue;
 use function Differ\Formatters\Common\getOldValue;
 use function Differ\Formatters\Common\getChildren;
@@ -13,7 +13,7 @@ use function Differ\Formatters\Common\getChildren;
 function renderPlain($diff, $path = '')
 {
     $result = array_map(function ($node) use ($path) {
-        $type = getType($node);
+        $type = getNodeType($node);
         $key = getKey($node);
         switch ($type) {
             case 'nested':
