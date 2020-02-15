@@ -48,5 +48,15 @@ function renderPlain($diff, $path = '')
 
 function stringify($value)
 {
-    return is_object($value) ? 'complex value' : $value;
+    switch (gettype($value)) {
+        case 'object':
+            return 'complex value';
+            break;
+        case 'boolean':
+            return $value ? 'true' : 'false';
+            break;
+        default:
+            return $value;
+            break;
+    }
 }

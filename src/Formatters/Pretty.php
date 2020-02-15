@@ -19,59 +19,57 @@ function renderPretty(array $array, $indent = "")
         $type = getNodeType($node);
         switch ($type) {
             case 'changed':
-                $acc[] = stringify($indent, $key, "+", getNewValue($node));
-                $acc[] = stringify($indent, $key, "-", getOldValue($node));
-                return $acc;
+                $stringifiedNew = stringify(getNewValue($node), $indent);
+                $stringifiedOld = stringify(getOldValue($node), $indent);
+                $acc[] = "{$indent}  + {$key}: {$stringifiedNew}";
+                $acc[] = "{$indent}  - {$key}: {$stringifiedOld}";
+                break;
             case 'nested':
                 $acc[] = "{$indent}    {$key}: {";
                 $acc[] = renderPretty(getChildren($node), $indent . "    ");
                 $acc[] = "{$indent}    }";
-                return $acc;
+                break;
             case 'same':
-                $sign = ' ';
-                $nodeValue = getNewValue($node);
+                $stringified = stringify(getNewValue($node), $indent);
+                $acc[] = "{$indent}    {$key}: {$stringified}";
                 break;
             case 'removed':
-                $sign = '-';
-                $nodeValue = getOldValue($node);
+                $stringified = stringify(getOldValue($node), $indent);
+                $acc[] = "{$indent}  - {$key}: {$stringified}";
                 break;
             case 'added':
-                $sign = '+';
-                $nodeValue = getNewValue($node);
+                $stringified = stringify(getNewValue($node), $indent);
+                $acc[] = "{$indent}  + {$key}: {$stringified}";
                 break;
         }
-        $acc[] = stringify($indent, $key, $sign, $nodeValue);
         return $acc;
     }, []);
 
-    $stringified = implode("\n", flattenAll($result));
+    $flattenedResult = implode("\n", flattenAll($result));
 
     $closingBrace = $indent === "" ? "\n}\n" : "";
     
-    return "{$openingBrace}{$stringified}{$closingBrace}";
+    return "{$openingBrace}{$flattenedResult}{$closingBrace}";
 }
 
-function stringify($indent, $key, $sign, $nodeValue)
+function stringify($nodeValue, $indent)
 {
     switch (gettype($nodeValue)) {
         case 'boolean':
-            $booleanStringified = $nodeValue ? "true" : "false";
-            $result = "{$indent}  {$sign} {$key}: {$booleanStringified}";
+            return $nodeValue ? "true" : "false";
             break;
         case 'object':
             $objectVars = get_object_vars($nodeValue);
-            $openingString = "{$indent}  {$sign} {$key}: {\n";
             $objectKeys = array_keys($objectVars);
             $valueStrings = array_map(function ($objectKey) use ($objectVars, $indent) {
-                return stringify($indent . "    ", $objectKey, " ", $objectVars[$objectKey]);
+                $stringified = stringify($objectVars[$objectKey], $indent . "    ");
+                return "{$indent}        {$objectKey}: {$stringified}";
             }, $objectKeys);
             $valueString = implode("\n", $valueStrings);
-            $closingString = "{$indent}    }";
-            $result = "{$openingString}{$valueString}\n{$closingString}";
+            return "{\n{$valueString}\n{$indent}    }";
             break;
         default:
-            $result = "{$indent}  {$sign} {$key}: {$nodeValue}";
+            return $nodeValue;
             break;
     }
-    return $result;
 }
