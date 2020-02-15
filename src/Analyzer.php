@@ -58,14 +58,9 @@ function makeDiff($valueBefore, $valueAfter)
             return makeNode('same', $key, $valueBefore[$key], $valueAfter[$key], null);
         }
         if (is_object($valueBefore[$key]) && is_object($valueAfter[$key])) {
-            if ($valueBefore[$key] != $valueAfter[$key]) {
-                $deeperData1 = get_object_vars($valueBefore[$key]);
-                $deeperData2 = get_object_vars($valueAfter[$key]);
-                return makeNode('nested', $key, null, null, makediff($deeperData1, $deeperData2));
-            } else {
-                $deeperData = get_object_vars($valueBefore[$key]);
-                return makeNode('same', $key, $deeperData, $deeperData, null);
-            }
+            $deeperData1 = get_object_vars($valueBefore[$key]);
+            $deeperData2 = get_object_vars($valueAfter[$key]);
+            return makeNode('nested', $key, null, null, makediff($deeperData1, $deeperData2));
         }
         if ($valueBefore[$key] !== $valueAfter[$key]) {
             return makeNode('changed', $key, $valueBefore[$key], $valueAfter[$key], null);

@@ -15,29 +15,28 @@ function renderPlain($diff, $path = '')
     $result = array_map(function ($node) use ($path) {
         $type = getNodeType($node);
         $key = getKey($node);
+        $fullPath = "{$path}{$key}";
         switch ($type) {
             case 'nested':
                 $currentPath = ($path === '') ? "{$key}." : "{$path}{$key}.";
                 return renderPlain(getChildren($node), $currentPath);
                 break;
             case 'removed':
-                $typeSpecificPart = "";
+                return "Property '{$fullPath}' was removed";
                 break;
             case 'added':
-                $value = is_object(getNewValue($node)) ? 'complex value' : getNewValue($node);
-                $typeSpecificPart = " with value: '{$value}'";
+                $value = stringify(getNewValue($node));
+                return "Property '{$fullPath}' was added with value: '{$value}'";
                 break;
             case 'changed':
-                $oldValue = is_object(getOldValue($node)) ? 'complex value' : getOldValue($node);
-                $newValue = is_object(getNewValue($node)) ? 'complex value' : getNewValue($node);
-                $typeSpecificPart = ". From '{$oldValue}' to '{$newValue}'";
+                $oldValue = stringify(getOldValue($node));
+                $newValue = stringify(getNewValue($node));
+                return "Property '{$fullPath}' was changed. From '{$oldValue}' to '{$newValue}'";
                 break;
             case 'same':
                 return;
                 break;
         }
-        $fullPath = "{$path}{$key}";
-        return "Property '{$fullPath}' was {$type}{$typeSpecificPart}";
     }, $diff);
     $filteredResult = array_filter($result, function ($sentence) {
         return $sentence;
@@ -45,4 +44,9 @@ function renderPlain($diff, $path = '')
 
     $flattenedResult = implode("\n", $filteredResult);
     return $path === '' ? $flattenedResult . "\n" : $flattenedResult;
+}
+
+function stringify($value)
+{
+    return is_object($value) ? 'complex value' : $value;
 }

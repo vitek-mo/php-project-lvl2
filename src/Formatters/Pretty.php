@@ -23,9 +23,6 @@ function renderPretty(array $array, $indent = "")
                 $acc[] = stringify($indent, $key, "-", getOldValue($node));
                 return $acc;
             case 'nested':
-                //вот тут ещё сомневаюсь, нужно ли и как в stringify значение типа Nested обрабатывать.
-                //тип возвращаемого значения getChildren будет array (массив из Node)
-                //можно сделать по этому отдельный case, в котором уже рекурсивно будет renderPretty вызываться
                 $acc[] = "{$indent}    {$key}: {";
                 $acc[] = renderPretty(getChildren($node), $indent . "    ");
                 $acc[] = "{$indent}    }";
